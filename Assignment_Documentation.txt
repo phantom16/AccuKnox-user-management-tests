@@ -1,0 +1,691 @@
+================================================================================
+          ACCUKNOX QA TRAINEE - ASSIGNMENT DOCUMENTATION
+          User Management E2E Testing | OrangeHRM
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+  1. Project Overview
+  2. Project Structure
+  3. Step-by-Step Setup Guide (From Scratch)
+  4. Problem Statement 1: Manual Test Cases
+  5. Problem Statement 1: Automation Code Explained
+       5.1  login_page.py
+       5.2  admin_page.py
+       5.3  conftest.py
+       5.4  test_user_management.py
+  6. How to Run the Tests
+  7. Problem Statement 2: Scripts Explained
+       7.1  system_health_monitor.py
+       7.2  app_health_checker.py
+  8. Test Results Summary
+
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+This project is a QA assignment that demonstrates end-to-end testing of the
+User Management module in OrangeHRM, an open-source HR management system.
+
+PROBLEM STATEMENT 1: User Management E2E Flow (Manual + Automation)
+  - Create and automate test cases for User Management in OrangeHRM
+  - Covers: adding a user, searching, editing, validating, deleting
+  - Automation: Playwright (Python) with Page Object Model pattern
+
+PROBLEM STATEMENT 2: Python Scripts (chose 2 of 4)
+  - System Health Monitoring Script
+  - Application Health Checker Script
+
+APPLICATION UNDER TEST (AUT):
+  - URL:      https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+  - Username: Admin
+  - Password: admin123
+
+REPOSITORY: https://github.com/phantom16/AccuKnox-user-management-tests
+
+
+================================================================================
+2. PROJECT STRUCTURE
+================================================================================
+
+AccuKnox-user-management-tests/
+|
+|-- pages/                              # Page Object Model classes
+|   |-- __init__.py
+|   |-- login_page.py                   # Login page actions & selectors
+|   |-- admin_page.py                   # Admin module actions & selectors
+|
+|-- tests/                              # Playwright test cases
+|   |-- __init__.py
+|   |-- conftest.py                     # Pytest fixtures (login, navigation)
+|   |-- test_user_management.py         # 10 E2E test cases
+|
+|-- test-cases/                         # Manual test documentation
+|   |-- manual_test_cases.csv           # 10 manual test cases (open in Excel)
+|
+|-- scripts/                            # Problem Statement 2
+|   |-- system_health_monitor.py        # System health monitoring
+|   |-- app_health_checker.py           # Application uptime checker
+|
+|-- pytest.ini                          # Pytest configuration
+|-- requirements.txt                    # Python dependencies
+|-- .gitignore
+|-- README.md
+
+WHY THIS STRUCTURE?
+  - pages/   -> Separates page logic from tests (Page Object Model)
+  - tests/   -> Contains all test files and fixtures
+  - scripts/ -> Problem Statement 2 utilities, independent of tests
+
+
+================================================================================
+3. STEP-BY-STEP SETUP GUIDE (FROM SCRATCH)
+================================================================================
+
+This guide assumes you have NOTHING installed except Windows.
+
+--- STEP A: Install Python ---
+
+  1. Go to https://www.python.org/downloads/
+  2. Download Python 3.10 or newer (3.12+ recommended)
+  3. Run the installer
+     IMPORTANT: Check the box "Add Python to PATH" at the bottom!
+  4. Click "Install Now"
+  5. Open Command Prompt (press Win+R, type "cmd", press Enter)
+  6. Verify:
+
+     python --version
+     # Should show: Python 3.12.x or similar
+
+--- STEP B: Install Git ---
+
+  1. Go to https://git-scm.com/downloads
+  2. Download and install Git for Windows (use all default options)
+  3. Verify:
+
+     git --version
+     # Should show: git version 2.x.x
+
+--- STEP C: Clone the Repository ---
+
+  1. Open Command Prompt or Git Bash
+  2. Navigate to where you want the project:
+
+     cd Desktop
+
+  3. Clone the repository:
+
+     git clone https://github.com/phantom16/AccuKnox-user-management-tests.git
+
+  4. Enter the project folder:
+
+     cd AccuKnox-user-management-tests
+
+--- STEP D: Create a Virtual Environment (Recommended) ---
+
+  A virtual environment keeps project dependencies isolated from system Python.
+
+  1. Create it:
+
+     python -m venv venv
+
+  2. Activate it:
+
+     # On Windows Command Prompt:
+     venv\Scripts\activate
+
+     # On Git Bash:
+     source venv/Scripts/activate
+
+     # You should see (venv) at the start of your prompt
+
+--- STEP E: Install Dependencies ---
+
+  1. Install all Python packages:
+
+     pip install -r requirements.txt
+
+  2. Install Playwright's Chromium browser:
+
+     playwright install chromium
+
+     This downloads a Chromium browser that Playwright will control.
+
+--- STEP F: Run the Tests! ---
+
+  1. Run all 10 tests:
+
+     pytest
+
+  2. A browser window will open and you'll see it perform actions automatically
+  3. Final output should show: "10 passed"
+
+THAT'S IT! You now have the entire project running.
+
+
+================================================================================
+4. PROBLEM STATEMENT 1: MANUAL TEST CASES
+================================================================================
+
+File: test-cases/manual_test_cases.csv
+Open this file in Excel or Google Sheets. It contains 10 test cases with columns:
+Test Case ID | Test Scenario | Pre-conditions | Test Steps | Test Data |
+Expected Result | Actual Result | Status
+
+Summary of all 10 test cases:
+
+  TC_001 - Navigate to the Admin Module
+           Login as Admin, click Admin tab, verify System Users page loads
+
+  TC_002 - Add a New User
+           Click Add, fill all fields (Role, Employee Name, Status,
+           Username, Password), click Save, verify success toast
+
+  TC_003 - Search the Newly Created User
+           Enter username in search field, click Search, verify user
+           appears in the results table
+
+  TC_004 - Search User by Role Filter
+           Select "Admin" from User Role dropdown, click Search,
+           verify all results show Admin role
+
+  TC_005 - Edit User - Change Role
+           Search user, click edit pencil icon, change role to ESS,
+           Save, verify success toast
+
+  TC_006 - Edit User - Change Status
+           Search user, click edit, change status to Disabled,
+           Save, verify success toast
+
+  TC_007 - Edit User - Change Password
+           Search user, click edit, toggle "Yes" for change password,
+           enter new password, Save, verify success toast
+
+  TC_008 - Validate Updated Details
+           Search user, verify role shows "ESS" and status shows
+           "Disabled" in the table row (confirms edits persisted)
+
+  TC_009 - Delete the User
+           Search user, click trash icon on the row, confirm deletion
+           in popup, verify "Successfully Deleted" toast
+
+  TC_010 - Verify Deleted User Cannot Be Found
+           Search for deleted username, verify "No Records Found" message
+
+
+================================================================================
+5. PROBLEM STATEMENT 1: AUTOMATION CODE EXPLAINED
+================================================================================
+
+The automation uses Playwright (Python) with the Page Object Model (POM).
+
+What is Page Object Model?
+  - Each web page gets its own Python class
+  - The class contains selectors (how to find elements) and actions (what to do)
+  - Tests call page methods instead of dealing with selectors directly
+  - If the UI changes, you only fix the page class, not every test
+
+
+--------------------------------------------------------------------------------
+5.1  login_page.py  (pages/login_page.py)
+--------------------------------------------------------------------------------
+
+PURPOSE: Handles the OrangeHRM login page
+
+CODE WALKTHROUGH:
+
+  class LoginPage:
+      URL = "https://opensource-demo.orangehrmlive.com/web/index.php/auth/login"
+
+      def __init__(self, page):
+          self.page = page
+          self.username_input = page.locator("input[name='username']")
+          self.password_input = page.locator("input[name='password']")
+          self.login_button = page.locator("button[type='submit']")
+
+EXPLANATION:
+  - __init__ receives the Playwright "page" object (the browser tab)
+  - It stores 3 locators: username field, password field, login button
+  - Locators use CSS selectors to find elements on the page
+
+  Methods:
+
+  navigate()
+    - Calls page.goto(URL) to open the login page in the browser
+    - wait_for_load_state("networkidle") waits until no network requests
+      are pending, ensuring the page fully loaded
+
+  login(username, password)
+    - .fill() types text into the input fields
+    - .click() clicks the login button
+    - Waits for network to settle after login
+
+  verify_dashboard_visible()
+    - Uses expect() to assert the "Dashboard" heading is visible
+    - timeout=15000 means it waits up to 15 seconds
+    - If Dashboard doesn't appear, the test fails here
+
+
+--------------------------------------------------------------------------------
+5.2  admin_page.py  (pages/admin_page.py)
+--------------------------------------------------------------------------------
+
+PURPOSE: Handles ALL User Management actions (search, add, edit, delete)
+         This is the biggest and most important file.
+
+KEY DESIGN DECISION - LABEL-BASED SELECTORS:
+
+  def _get_field_group(self, label_text):
+      return self.page.locator(
+          f".oxd-form .oxd-grid-item:has(.oxd-label:text-is('{label_text}'))"
+      )
+
+  WHY? OrangeHRM uses nested CSS grids. Selectors like "nth-child(3)" break
+  when the form layout changes. Instead, we find fields by their visible
+  label text (e.g., "Username", "Status"). This is:
+    - More reliable (labels don't change)
+    - Self-documenting (you can read what field it targets)
+    - Works on both the Add form and Search form
+
+  Helper methods built on this:
+
+  _select_dropdown(label_text, option_text)
+    - Finds the dropdown by its label, clicks it to open
+    - Then clicks the matching option in the dropdown list
+
+  _fill_input(label_text, value)
+    - Finds the text input by its label
+    - Fills it with the given value
+
+ALL METHODS EXPLAINED:
+
+  Navigation:
+    navigate_to_admin()         - Clicks "Admin" in sidebar, waits for page
+    verify_admin_page_loaded()  - Checks "System Users" heading is visible
+
+  Search:
+    search_by_username(name)    - Fills Username field, clicks Search
+    search_by_role(role)        - Selects role dropdown, clicks Search
+
+  Table:
+    get_table_rows()            - Returns all rows in the results table
+    get_first_row_cells()       - Returns cells of the first row
+    get_record_count()          - Returns number of rows
+
+  Add User:
+    click_add()                 - Clicks "+ Add" button, waits for form
+    select_user_role(role)      - Picks role from dropdown (Admin/ESS)
+    select_status(status)       - Picks status (Enabled/Disabled)
+    fill_employee_name(name)    - Types partial name, waits for autocomplete,
+                                  clicks first suggestion
+    fill_username(name)         - Types into Username field
+    fill_password(pwd)          - Fills both Password and Confirm Password
+    click_save()                - Clicks Save, waits for response
+
+  Verification:
+    verify_success_toast(msg)   - Waits for green toast notification to appear
+                                  and checks it contains the expected message
+
+  Edit User:
+    click_first_row_edit()      - Clicks the pencil icon on the first row
+    toggle_change_password()    - Clicks "Yes" label to show password fields
+
+  Delete User:
+    click_first_row_delete()    - Clicks the trash icon on the first row
+    confirm_delete()            - Clicks "Yes, Delete" in the popup dialog
+    verify_no_records_found()   - Checks "No Records Found" span is visible
+
+
+--------------------------------------------------------------------------------
+5.3  conftest.py  (tests/conftest.py)
+--------------------------------------------------------------------------------
+
+PURPOSE: Pytest fixtures - reusable setup code that runs before each test
+
+WHAT ARE FIXTURES?
+  Fixtures are functions decorated with @pytest.fixture. When a test method
+  has a parameter with the same name as a fixture, pytest automatically
+  runs the fixture first and passes the result to the test.
+
+CODE WALKTHROUGH:
+
+  @pytest.fixture(scope="session")
+  def browser_context_args():
+      return {"viewport": {"width": 1280, "height": 720},
+              "ignore_https_errors": True}
+
+  -> Sets browser window to 1280x720 for all tests in the session
+  -> ignore_https_errors prevents SSL certificate failures
+
+  @pytest.fixture()
+  def logged_in_page(page):
+      login = LoginPage(page)
+      login.navigate()
+      login.login("Admin", "admin123")
+      login.verify_dashboard_visible()
+      return page
+
+  -> "page" is a built-in Playwright fixture (a fresh browser tab)
+  -> This fixture logs in before the test and returns the page at Dashboard
+  -> Each test gets a FRESH browser session
+
+  @pytest.fixture()
+  def admin_page(logged_in_page):
+      admin = AdminPage(logged_in_page)
+      admin.navigate_to_admin()
+      return admin
+
+  -> Depends on logged_in_page (pytest runs that first)
+  -> Navigates to Admin module, returns AdminPage object
+  -> When a test asks for "admin_page", it gets: login -> admin nav -> ready
+
+HOW THE CHAIN WORKS:
+  Test requests "admin_page"
+    -> pytest sees admin_page needs logged_in_page
+    -> pytest sees logged_in_page needs page (built-in)
+    -> Playwright opens browser, creates page
+    -> logged_in_page logs in
+    -> admin_page navigates to Admin
+    -> Test receives ready-to-use AdminPage object
+
+
+--------------------------------------------------------------------------------
+5.4  test_user_management.py  (tests/test_user_management.py)
+--------------------------------------------------------------------------------
+
+PURPOSE: Contains all 10 E2E test cases, one class per test scenario
+
+UNIQUE USERNAME:
+  TEST_USERNAME = "TestUsr_" + random 5 digits  (e.g., "TestUsr_48291")
+
+  The OrangeHRM demo site is shared by everyone on the internet.
+  A random username avoids collisions with other people's test data.
+
+TABLE COLUMN CONSTANTS:
+  COL_USERNAME = 1    (cells: 0=checkbox, 1=username, 2=role,
+  COL_ROLE = 2                3=employee_name, 4=status, 5=actions)
+  COL_STATUS = 4
+
+  These map to the column positions in the OrangeHRM table.
+
+TEST EXPLANATIONS:
+
+  TC_001: TestNavigateToAdmin.test_navigate_to_admin_module
+    Fixture: logged_in_page (logs in but does NOT navigate to Admin)
+    What it does:
+      1. Creates AdminPage object
+      2. Calls navigate_to_admin() manually
+      3. Calls verify_admin_page_loaded()
+      4. Asserts the URL contains "/admin/viewSystemUsers"
+    Why: Proves the Admin module can be reached from Dashboard
+
+  TC_002: TestAddUser.test_add_new_user
+    Fixture: admin_page (logged in + on Admin page)
+    What it does:
+      1. Clicks Add button
+      2. Selects User Role = "Admin"
+      3. Selects Status = "Enabled"
+      4. Types "a" in Employee Name, picks first autocomplete result
+      5. Fills unique username (TestUsr_XXXXX)
+      6. Fills password in both fields
+      7. Clicks Save
+      8. Verifies "Successfully Saved" toast appears
+    Why: Tests the full user creation flow
+
+  TC_003: TestSearchUser.test_search_user_by_username
+    What it does:
+      1. Types TEST_USERNAME in search field, clicks Search
+      2. Asserts the first row is visible
+      3. Checks the username column contains TEST_USERNAME
+    Why: Confirms the user we just created can be found
+
+  TC_004: TestSearchByRole.test_search_user_by_role
+    What it does:
+      1. Selects "Admin" from User Role dropdown
+      2. Clicks Search
+      3. Asserts at least 1 result exists
+      4. Checks the first row's role column says "Admin"
+    Why: Tests the role filter functionality
+
+  TC_005: TestEditUserRole.test_edit_user_role
+    What it does:
+      1. Searches for TEST_USERNAME
+      2. Clicks pencil (edit) icon on the row
+      3. Changes User Role to "ESS"
+      4. Clicks Save
+      5. Verifies "Successfully Updated" toast
+    Why: Tests editing the user role field
+
+  TC_006: TestEditUserStatus.test_edit_user_status
+    What it does:
+      1. Searches, clicks edit
+      2. Changes Status to "Disabled"
+      3. Saves, verifies toast
+    Why: Tests editing the status field
+
+  TC_007: TestEditUserPassword.test_edit_user_password
+    What it does:
+      1. Searches, clicks edit
+      2. Toggles "Yes" on Change Password
+      3. Fills new password in both fields
+      4. Saves, verifies toast
+    Why: Tests the password change flow
+
+  TC_008: TestValidateUpdatedDetails.test_validate_updated_user_details
+    What it does:
+      1. Searches for TEST_USERNAME
+      2. Reads the table row cells
+      3. Asserts: role column = "ESS"
+      4. Asserts: status column = "Disabled"
+    Why: Confirms all edits from TC_005-007 actually persisted
+
+  TC_009: TestDeleteUser.test_delete_user
+    What it does:
+      1. Searches for TEST_USERNAME
+      2. Clicks trash icon on the row
+      3. Clicks "Yes, Delete" in confirmation popup
+      4. Verifies "Successfully Deleted" toast
+    Why: Tests the delete flow
+
+  TC_010: TestVerifyDeletion.test_verify_deleted_user_not_found
+    What it does:
+      1. Searches for TEST_USERNAME
+      2. Asserts "No Records Found" message appears
+    Why: Confirms the user is truly gone from the system
+
+
+================================================================================
+6. HOW TO RUN THE TESTS
+================================================================================
+
+--- Run All Tests (Default) ---
+
+  pytest
+
+  This runs all 10 tests with a visible browser (headed mode) and
+  300ms slow motion between actions (configured in pytest.ini).
+
+--- Run in Headless Mode (No Browser Window) ---
+
+  pytest --headless
+
+--- Run a Specific Test ---
+
+  # Only the Add User test:
+  pytest tests/test_user_management.py::TestAddUser -v
+
+  # Only the Delete test:
+  pytest tests/test_user_management.py::TestDeleteUser -v
+
+  # Only the Search tests:
+  pytest tests/test_user_management.py::TestSearchUser -v
+
+--- Run with HTML Report ---
+
+  pip install pytest-html
+  pytest --html=report.html --self-contained-html
+
+  Then open report.html in your browser for a visual test report.
+
+--- Configuration File (pytest.ini) ---
+
+  [pytest]
+  testpaths = tests
+  addopts = --headed --slowmo=300 -v
+
+  - testpaths = tests    -> Look for tests in the "tests/" folder
+  - --headed             -> Open a visible browser window
+  - --slowmo=300         -> 300ms delay between Playwright actions
+  - -v                   -> Verbose output (shows each test name)
+
+
+================================================================================
+7. PROBLEM STATEMENT 2: SCRIPTS EXPLAINED
+================================================================================
+
+
+--------------------------------------------------------------------------------
+7.1  system_health_monitor.py  (scripts/system_health_monitor.py)
+--------------------------------------------------------------------------------
+
+PURPOSE: Monitors CPU, memory, disk space, and running processes.
+         Alerts when any metric exceeds predefined thresholds.
+
+LIBRARY USED: psutil (cross-platform system monitoring)
+
+THRESHOLDS (configurable at the top of the file):
+  CPU_THRESHOLD    = 80%
+  MEMORY_THRESHOLD = 80%
+  DISK_THRESHOLD   = 80%
+  TOP_PROCESSES    = 5
+
+HOW EACH FUNCTION WORKS:
+
+  check_cpu()
+    - psutil.cpu_percent(interval=1) samples CPU for 1 second
+    - If usage > 80%, logs a WARNING alert
+    - Returns the percentage value
+
+  check_memory()
+    - psutil.virtual_memory() returns memory stats
+    - .percent = usage percentage
+    - .total = total RAM in bytes (converted to GB for display)
+    - .available = free RAM
+    - Alerts if > 80%
+
+  check_disk()
+    - psutil.disk_partitions() lists all drives (C:\, D:\, etc.)
+    - For each drive, psutil.disk_usage() gets usage stats
+    - Alerts for each drive that exceeds 80%
+    - Handles PermissionError for restricted drives
+
+  check_processes()
+    - Iterates all running processes via psutil.process_iter()
+    - Collects PID, name, CPU%, memory% for each
+    - Sorts by CPU usage descending
+    - Displays the top 5
+
+  generate_report()
+    - Runs all 4 checks
+    - Prints overall status: "HEALTHY" or "ALERTS DETECTED"
+
+HOW TO RUN:
+
+  python scripts/system_health_monitor.py
+
+  Output goes to both the console AND scripts/system_health.log
+
+
+--------------------------------------------------------------------------------
+7.2  app_health_checker.py  (scripts/app_health_checker.py)
+--------------------------------------------------------------------------------
+
+PURPOSE: Checks if web applications are up or down by making HTTP requests
+         and evaluating response status codes.
+
+LIBRARY USED: requests (HTTP library)
+
+DEFAULT URLS CHECKED:
+  1. OrangeHRM login page          -> should be UP (200)
+  2. Google.com                    -> should be UP (200)
+  3. httpstat.us/500               -> always returns 500 (tests DOWN detection)
+  4. nonexistent domain            -> tests connection error handling
+
+HOW IT WORKS:
+
+  check_url(url)
+    - Makes an HTTP GET request with 10-second timeout
+    - If status code 200-399: status = "up" (healthy)
+    - If status code 400+: status = "down" (problem)
+    - Catches ConnectionError: DNS failure, server unreachable
+    - Catches Timeout: server took too long to respond
+    - Returns a dict with: url, status_code, response_time_ms, status, error
+
+  check_all(urls)
+    - Loops through all URLs
+    - Calls check_url() for each
+    - Logs results as they come in
+
+  print_report(results)
+    - Prints a formatted table: URL | Status | Code | Time
+    - Shows totals: how many up vs down
+
+HOW TO RUN:
+
+  # Check default URLs:
+  python scripts/app_health_checker.py
+
+  # Check your own URLs:
+  python scripts/app_health_checker.py https://example.com https://myapp.com
+
+  Output goes to both the console AND scripts/app_health.log
+
+
+================================================================================
+8. TEST RESULTS SUMMARY
+================================================================================
+
+All 10 automated E2E tests pass successfully:
+
+  =================== test session starts ====================
+  collected 10 items
+
+  TestNavigateToAdmin::test_navigate_to_admin_module   PASSED
+  TestAddUser::test_add_new_user                       PASSED
+  TestSearchUser::test_search_user_by_username          PASSED
+  TestSearchByRole::test_search_user_by_role            PASSED
+  TestEditUserRole::test_edit_user_role                 PASSED
+  TestEditUserStatus::test_edit_user_status             PASSED
+  TestEditUserPassword::test_edit_user_password         PASSED
+  TestValidateUpdatedDetails::test_validate_updated..   PASSED
+  TestDeleteUser::test_delete_user                      PASSED
+  TestVerifyDeletion::test_verify_deleted_user_not..    PASSED
+
+  ================ 10 passed in ~220s (3:40) =================
+
+
+System Health Monitor - Sample Output:
+
+  CPU Usage: 11.7%
+  Memory Usage: 42.3% (Total: 23.91 GB)
+  Disk [C:\]: 46.2% used
+  Disk [D:\]: 82.1% used  << ALERT: exceeds 80%
+  Overall Status: ALERTS DETECTED
+
+
+App Health Checker - Sample Output:
+
+  URL                               Status   Code   Time(ms)
+  ---------------------------------------------------------------
+  orangehrmlive.com/login            UP       200    2797
+  google.com                         UP       200     597
+  httpstat.us/500                    DOWN     N/A     N/A
+  nonexistent.com                    DOWN     N/A     N/A
+  ---------------------------------------------------------------
+  Total: 4 | Up: 2 | Down: 2
+
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================

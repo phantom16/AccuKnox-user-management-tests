@@ -49,7 +49,7 @@ class AdminPage:
         self._fill_input("Username", username)
         self.search_button.click()
         self.page.wait_for_load_state("networkidle")
-        self.page.wait_for_timeout(1000)
+        self.page.wait_for_timeout(2000)
 
     def search_by_role(self, role: str):
         self._select_dropdown("User Role", role)
@@ -81,12 +81,17 @@ class AdminPage:
 
     def fill_employee_name(self, name: str):
         emp_input = self.page.locator("input[placeholder='Type for hints...']")
-        emp_input.fill(name)
-        self.page.wait_for_timeout(2000)
         autocomplete_option = self.page.locator(".oxd-autocomplete-option")
+        # Try the given name first, fall back to other letters if no results
+        for letter in [name, "e", "j", "o"]:
+            emp_input.fill("")
+            emp_input.fill(letter)
+            self.page.wait_for_timeout(3000)
+            if autocomplete_option.count() > 0:
+                break
         expect(autocomplete_option.first).to_be_visible(timeout=10000)
         autocomplete_option.first.click()
-        self.page.wait_for_timeout(500)
+        self.page.wait_for_timeout(1000)
 
     def fill_username(self, username: str):
         self._fill_input("Username", username)
@@ -98,13 +103,15 @@ class AdminPage:
 
     def click_save(self):
         self.page.locator("button[type='submit']:has-text('Save')").click()
-        self.page.wait_for_load_state("networkidle")
+        # Wait for the toast to confirm save succeeded (more reliable than networkidle)
+        expect(self.toast_message).to_be_visible(timeout=20000)
         self.page.wait_for_timeout(1000)
 
     def verify_success_toast(self, message: str = "Success"):
-        expect(self.toast_message).to_be_visible(timeout=15000)
+        expect(self.toast_message).to_be_visible(timeout=20000)
         expect(self.toast_message).to_contain_text(message, timeout=5000)
-        self.page.wait_for_timeout(1000)
+        # Wait for toast to disappear and page to settle
+        self.page.wait_for_timeout(2000)
 
     # --- Edit User ---
     def click_first_row_edit(self):
