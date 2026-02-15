@@ -1,5 +1,5 @@
 import pytest
-from playwright.sync_api import Page
+from playwright.sync_api import Page, BrowserType
 from pages.login_page import LoginPage
 from pages.admin_page import AdminPage
 

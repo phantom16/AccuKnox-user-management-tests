@@ -85,8 +85,8 @@ pytest --html=report.html --self-contained-html
 
 ## Playwright Version
 
-- **Playwright**: 1.49.1
-- **pytest-playwright**: 0.6.2
+- **Playwright**: 1.58.0
+- **pytest-playwright**: 0.7.2
 
 ---
 

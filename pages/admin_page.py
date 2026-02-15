@@ -15,45 +15,49 @@ class AdminPage:
         self.records_table = page.locator(".oxd-table-body")
         self.no_records_text = page.locator("span:has-text('No Records Found')")
 
+    # --- Helper: find form field by label text ---
+    def _get_field_group(self, label_text: str):
+        """Return the .oxd-grid-item that contains the given label."""
+        return self.page.locator(
+            f".oxd-form .oxd-grid-item:has(.oxd-label:text-is('{label_text}'))"
+        )
+
+    def _select_dropdown(self, label_text: str, option_text: str):
+        """Click a dropdown identified by its label and pick an option."""
+        group = self._get_field_group(label_text)
+        group.locator(".oxd-select-text").click()
+        self.page.locator(
+            f".oxd-select-dropdown .oxd-select-option:has-text('{option_text}')"
+        ).click()
+
+    def _fill_input(self, label_text: str, value: str):
+        """Fill a text input identified by its label."""
+        group = self._get_field_group(label_text)
+        group.locator("input").fill(value)
+
+    # --- Navigation ---
     def navigate_to_admin(self):
         self.admin_menu.click()
         self.page.wait_for_load_state("networkidle")
-        expect(self.page.locator("h6", has_text="Admin")).to_be_visible(timeout=10000)
+        expect(self.page.locator("h6", has_text="Admin")).to_be_visible(timeout=15000)
 
     def verify_admin_page_loaded(self):
         expect(self.page.locator("h5", has_text="System Users")).to_be_visible(timeout=10000)
 
     # --- Search filters ---
-    def get_username_search_input(self):
-        return self.page.locator(
-            ".oxd-form .oxd-grid-item:nth-child(1) input"
-        )
-
-    def get_user_role_dropdown(self):
-        return self.page.locator(
-            ".oxd-form .oxd-grid-item:nth-child(2) .oxd-select-text"
-        )
-
-    def get_status_dropdown(self):
-        return self.page.locator(
-            ".oxd-form .oxd-grid-item:nth-child(4) .oxd-select-text"
-        )
-
     def search_by_username(self, username: str):
-        search_input = self.get_username_search_input()
-        search_input.fill(username)
+        self._fill_input("Username", username)
         self.search_button.click()
         self.page.wait_for_load_state("networkidle")
         self.page.wait_for_timeout(1000)
 
     def search_by_role(self, role: str):
-        dropdown = self.get_user_role_dropdown()
-        dropdown.click()
-        self.page.locator(f".oxd-select-dropdown .oxd-select-option:has-text('{role}')").click()
+        self._select_dropdown("User Role", role)
         self.search_button.click()
         self.page.wait_for_load_state("networkidle")
         self.page.wait_for_timeout(1000)
 
+    # --- Table helpers ---
     def get_table_rows(self):
         return self.page.locator(".oxd-table-body .oxd-table-row")
 
@@ -67,36 +71,25 @@ class AdminPage:
     def click_add(self):
         self.add_button.click()
         self.page.wait_for_load_state("networkidle")
+        expect(self.page.locator("h6", has_text="Add User")).to_be_visible(timeout=10000)
 
     def select_user_role(self, role: str):
-        dropdown = self.page.locator(
-            ".oxd-form .oxd-grid-item:nth-child(1) .oxd-select-text"
-        )
-        dropdown.click()
-        self.page.locator(
-            f".oxd-select-dropdown .oxd-select-option:has-text('{role}')"
-        ).click()
+        self._select_dropdown("User Role", role)
 
     def select_status(self, status: str):
-        dropdown = self.page.locator(
-            ".oxd-form .oxd-grid-item:nth-child(3) .oxd-select-text"
-        )
-        dropdown.click()
-        self.page.locator(
-            f".oxd-select-dropdown .oxd-select-option:has-text('{status}')"
-        ).click()
+        self._select_dropdown("Status", status)
 
     def fill_employee_name(self, name: str):
         emp_input = self.page.locator("input[placeholder='Type for hints...']")
         emp_input.fill(name)
-        self.page.wait_for_timeout(1500)
-        autocomplete_option = self.page.locator(".oxd-autocomplete-option").first
-        autocomplete_option.click()
+        self.page.wait_for_timeout(2000)
+        autocomplete_option = self.page.locator(".oxd-autocomplete-option")
+        expect(autocomplete_option.first).to_be_visible(timeout=10000)
+        autocomplete_option.first.click()
+        self.page.wait_for_timeout(500)
 
     def fill_username(self, username: str):
-        self.page.locator(
-            ".oxd-form .oxd-grid-item:nth-child(4) input"
-        ).fill(username)
+        self._fill_input("Username", username)
 
     def fill_password(self, password: str):
         password_inputs = self.page.locator("input[type='password']")
@@ -106,32 +99,43 @@ class AdminPage:
     def click_save(self):
         self.page.locator("button[type='submit']:has-text('Save')").click()
         self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_timeout(1000)
 
     def verify_success_toast(self, message: str = "Success"):
-        expect(self.toast_message).to_be_visible(timeout=10000)
+        expect(self.toast_message).to_be_visible(timeout=15000)
         expect(self.toast_message).to_contain_text(message, timeout=5000)
+        self.page.wait_for_timeout(1000)
 
     # --- Edit User ---
     def click_first_row_edit(self):
-        self.get_table_rows().first.locator(
+        edit_button = self.get_table_rows().first.locator(
             "button:has(.oxd-icon.bi-pencil-fill)"
-        ).click()
+        )
+        expect(edit_button).to_be_visible(timeout=10000)
+        edit_button.click()
         self.page.wait_for_load_state("networkidle")
+        expect(self.page.locator("h6", has_text="Edit User")).to_be_visible(timeout=10000)
 
     def toggle_change_password(self):
         self.page.locator("label:has-text('Yes')").click()
-
-    # --- Delete User ---
-    def select_first_row_checkbox(self):
-        self.get_table_rows().first.locator(".oxd-checkbox-input label").click()
-
-    def click_delete_selected(self):
-        self.delete_selected_button.click()
         self.page.wait_for_timeout(500)
 
+    # --- Delete User ---
+    def click_first_row_delete(self):
+        """Click the trash/delete icon button on the first table row."""
+        delete_button = self.get_table_rows().first.locator(
+            "button:has(.oxd-icon.bi-trash)"
+        )
+        expect(delete_button).to_be_visible(timeout=10000)
+        delete_button.click()
+        self.page.wait_for_timeout(1000)
+
     def confirm_delete(self):
-        self.page.locator("button:has-text('Yes, Delete')").click()
+        confirm_btn = self.page.locator("button:has-text('Yes, Delete')")
+        expect(confirm_btn).to_be_visible(timeout=5000)
+        confirm_btn.click()
         self.page.wait_for_load_state("networkidle")
 
     def verify_no_records_found(self):
-        expect(self.no_records_text).to_be_visible(timeout=10000)
+        no_records = self.page.locator("span.oxd-text:has-text('No Records Found')")
+        expect(no_records).to_be_visible(timeout=10000)

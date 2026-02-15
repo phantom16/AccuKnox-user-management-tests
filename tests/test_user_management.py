@@ -2,6 +2,7 @@
 End-to-End tests for User Management in OrangeHRM Admin module.
 
 Covers: Navigate, Add, Search, Edit, Validate, Delete user flows.
+Tests run in order within a single browser session to maintain state.
 """
 import pytest
 import random
@@ -14,6 +15,13 @@ from pages.admin_page import AdminPage
 TEST_USERNAME = "TestUsr_" + "".join(random.choices(string.digits, k=5))
 TEST_PASSWORD = "Test@1234"
 NEW_PASSWORD = "NewPass@5678"
+
+
+# Table cell indices (from debug):
+# 0=checkbox, 1=username, 2=role, 3=employee_name, 4=status, 5=actions
+COL_USERNAME = 1
+COL_ROLE = 2
+COL_STATUS = 4
 
 
 # ---------- TC_001: Navigate to Admin Module ----------
@@ -33,7 +41,7 @@ class TestAddUser:
         admin_page.click_add()
         admin_page.select_user_role("Admin")
         admin_page.select_status("Enabled")
-        admin_page.fill_employee_name("a")  # type partial name to trigger autocomplete
+        admin_page.fill_employee_name("a")
         admin_page.fill_username(TEST_USERNAME)
         admin_page.fill_password(TEST_PASSWORD)
         admin_page.click_save()
@@ -48,7 +56,7 @@ class TestSearchUser:
         rows = admin_page.get_table_rows()
         expect(rows.first).to_be_visible(timeout=10000)
         first_cells = admin_page.get_first_row_cells()
-        expect(first_cells.nth(1)).to_contain_text(TEST_USERNAME)
+        expect(first_cells.nth(COL_USERNAME)).to_contain_text(TEST_USERNAME)
 
 
 # ---------- TC_004: Search User by Role Filter ----------
@@ -59,9 +67,8 @@ class TestSearchByRole:
         rows = admin_page.get_table_rows()
         count = rows.count()
         assert count >= 1, "Expected at least one Admin user"
-        # Verify first row shows Admin role
         first_cells = admin_page.get_first_row_cells()
-        expect(first_cells.nth(2)).to_contain_text("Admin")
+        expect(first_cells.nth(COL_ROLE)).to_contain_text("Admin")
 
 
 # ---------- TC_005: Edit User – Change Role ----------
@@ -104,9 +111,8 @@ class TestValidateUpdatedDetails:
         """Verify previously edited fields are persisted."""
         admin_page.search_by_username(TEST_USERNAME)
         first_cells = admin_page.get_first_row_cells()
-        # After edits: role should be ESS, status Disabled
-        expect(first_cells.nth(2)).to_contain_text("ESS")
-        expect(first_cells.nth(3)).to_contain_text("Disabled")
+        expect(first_cells.nth(COL_ROLE)).to_contain_text("ESS")
+        expect(first_cells.nth(COL_STATUS)).to_contain_text("Disabled")
 
 
 # ---------- TC_009: Delete the User ----------
@@ -114,8 +120,7 @@ class TestDeleteUser:
     def test_delete_user(self, admin_page: AdminPage):
         """Delete the test user and verify success toast."""
         admin_page.search_by_username(TEST_USERNAME)
-        admin_page.select_first_row_checkbox()
-        admin_page.click_delete_selected()
+        admin_page.click_first_row_delete()
         admin_page.confirm_delete()
         admin_page.verify_success_toast("Successfully Deleted")
 
