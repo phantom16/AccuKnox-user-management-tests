@@ -1,0 +1,114 @@
+Test Case ID,Test Scenario,Pre-conditions,Test Steps,Test Data,Expected Result,Actual Result,Status
+TC_001,Navigate to the Admin Module,"1. User is logged in as Admin
+2. Dashboard page is displayed","1. Open browser and navigate to OrangeHRM login URL
+2. Enter valid credentials and click Login
+3. Click on 'Admin' tab in the left sidebar menu","URL: https://opensource-demo.orangehrmlive.com/web/index.php/auth/login
+Username: Admin
+Password: admin123","1. Login is successful and Dashboard is displayed
+2. Admin module page loads with User Management section visible
+3. URL changes to /admin/viewSystemUsers
+4. System Users list is displayed with search filters",,
+TC_002,Add a New User,"1. User is logged in as Admin
+2. Admin module is open (System Users page)","1. Click the '+ Add' button on the System Users page
+2. Select User Role from dropdown (e.g., 'Admin')
+3. Enter Employee Name (start typing and select from autocomplete)
+4. Select Status as 'Enabled'
+5. Enter a unique Username
+6. Enter Password meeting complexity requirements
+7. Confirm Password
+8. Click 'Save' button","User Role: Admin
+Employee Name: (select existing employee)
+Status: Enabled
+Username: TestUser_Auto
+Password: Test@1234
+Confirm Password: Test@1234","1. Add User form is displayed with all required fields
+2. All dropdowns populate correctly
+3. Employee Name autocomplete works
+4. After clicking Save, a success toast message 'Successfully Saved' appears
+5. User is redirected back to System Users list
+6. Newly created user appears in the list",,
+TC_003,Search the Newly Created User,"1. User is logged in as Admin
+2. At least one user 'TestUser_Auto' exists in the system
+3. Admin > User Management page is open","1. In the System Users page, locate the search filters
+2. Enter the username 'TestUser_Auto' in the Username field
+3. Click the 'Search' button
+4. Verify the search results display the correct user","Username: TestUser_Auto","1. Search filters are visible at the top of the page
+2. Username field accepts text input
+3. After clicking Search, the results table updates
+4. Exactly one record is shown matching 'TestUser_Auto'
+5. The record shows correct User Role, Employee Name, and Status",,
+TC_004,Search User by Role Filter,"1. User is logged in as Admin
+2. Admin > User Management page is open","1. In the System Users page, locate the search filters
+2. Select 'Admin' from the User Role dropdown
+3. Click the 'Search' button
+4. Verify all displayed users have the 'Admin' role","User Role: Admin","1. User Role dropdown shows options (Admin, ESS)
+2. After clicking Search, results are filtered
+3. All displayed records show 'Admin' as their User Role
+4. Record count updates to reflect filtered results",,
+TC_005,Edit User Details - Change Role,"1. User is logged in as Admin
+2. User 'TestUser_Auto' exists in the system
+3. Admin > User Management page is open","1. Search for 'TestUser_Auto' using the search filters
+2. Click on the user record in the results table
+3. Change User Role from 'Admin' to 'ESS'
+4. Click 'Save' button","Username: TestUser_Auto
+New User Role: ESS","1. User edit form opens with pre-filled current details
+2. User Role dropdown allows changing the value
+3. After saving, success toast 'Successfully Updated' appears
+4. User is redirected to System Users list
+5. The user record now shows 'ESS' as User Role",,
+TC_006,Edit User Details - Change Status,"1. User is logged in as Admin
+2. User 'TestUser_Auto' exists
+3. Admin > User Management page is open","1. Search for 'TestUser_Auto'
+2. Click on the user record
+3. Change Status from 'Enabled' to 'Disabled'
+4. Click 'Save' button","Username: TestUser_Auto
+New Status: Disabled","1. Edit form loads with current Status shown
+2. Status dropdown allows changing value
+3. After saving, success toast 'Successfully Updated' appears
+4. User record now shows 'Disabled' status",,
+TC_007,Edit User Details - Change Password,"1. User is logged in as Admin
+2. User 'TestUser_Auto' exists
+3. Admin > User Management page is open","1. Search for 'TestUser_Auto'
+2. Click on the user record
+3. Toggle 'Yes' on the Change Password checkbox/radio
+4. Enter new password
+5. Confirm new password
+6. Click 'Save' button","Username: TestUser_Auto
+New Password: NewPass@5678
+Confirm Password: NewPass@5678","1. Change Password option is visible on edit form
+2. Password fields appear when toggled
+3. Password validation enforces complexity rules
+4. After saving, success toast 'Successfully Updated' appears
+5. User can log in with the new password",,
+TC_008,Validate Updated User Details,"1. User is logged in as Admin
+2. User 'TestUser_Auto' has been edited (Role changed to ESS, Status to Disabled)
+3. Admin > User Management page is open","1. Search for 'TestUser_Auto' in the Username field
+2. Click 'Search' button
+3. Verify the user record in the results
+4. Click on the user record to open edit form
+5. Verify all previously updated fields retain their new values","Username: TestUser_Auto","1. Search returns the user record
+2. In the list view: User Role shows 'ESS', Status shows 'Disabled'
+3. In edit form: User Role dropdown shows 'ESS'
+4. Status dropdown shows 'Disabled'
+5. Employee Name remains unchanged
+6. All edits from previous test cases are persisted correctly",,
+TC_009,Delete the User,"1. User is logged in as Admin
+2. User 'TestUser_Auto' exists in the system
+3. Admin > User Management page is open","1. Search for 'TestUser_Auto'
+2. Select the checkbox next to the user record
+3. Click the 'Delete Selected' (trash icon) button at the top
+4. A confirmation dialog appears
+5. Click 'Yes, Delete' to confirm deletion","Username: TestUser_Auto","1. Checkbox is selectable on the user record
+2. Delete button becomes active after selection
+3. Confirmation dialog appears asking to confirm deletion
+4. After confirming, success toast 'Successfully Deleted' appears
+5. User is removed from the list
+6. Searching for 'TestUser_Auto' returns 'No Records Found'",,
+TC_010,Verify Deleted User Cannot Be Found,"1. User is logged in as Admin
+2. User 'TestUser_Auto' has been deleted
+3. Admin > User Management page is open","1. Enter 'TestUser_Auto' in the Username search field
+2. Click 'Search' button
+3. Observe the search results","Username: TestUser_Auto","1. Search completes without errors
+2. Results table shows 'No Records Found' message
+3. Record count shows 0
+4. The deleted user does not appear in any search results",,
